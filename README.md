@@ -11,12 +11,16 @@ You can set up and run the entire application with a single command. This will b
 
 **Mac / Linux:**
 ```bash
+git clone https://github.com/Austin6868/ceac-llm-checker.git
+cd ceac-llm-checker
 chmod +x start.sh
 ./start.sh
 ```
 
 **Windows (CMD/PowerShell):**
 ```cmd
+git clone https://github.com/Austin6868/ceac-llm-checker.git
+cd ceac-llm-checker
 start.bat
 ```
 
