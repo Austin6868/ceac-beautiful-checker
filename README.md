@@ -9,9 +9,15 @@ Built to bypass CEAC's complex anti-bot measures (ViewState, dynamic CAPTCHAs, a
 ### Quickstart (Recommended)
 You can set up and run the entire application with a single command. This will bypass the cloud AI and email configurations, defaulting to the local ONNX solver.
 
+**Mac / Linux:**
 ```bash
 chmod +x start.sh
 ./start.sh
+```
+
+**Windows (CMD/PowerShell):**
+```cmd
+start.bat
 ```
 
 ### Manual Setup
