@@ -6,7 +6,17 @@ Built to bypass CEAC's complex anti-bot measures (ViewState, dynamic CAPTCHAs, a
 
 ## 🚀 Getting Started
 
-### Prerequisites
+### Quickstart (Recommended)
+You can set up and run the entire application with a single command. This will bypass the cloud AI and email configurations, defaulting to the local ONNX solver.
+
+```bash
+chmod +x start.sh
+./start.sh
+```
+
+### Manual Setup
+
+#### Prerequisites
 - **Node.js**: v18+ (for Next.js)
 - **Python**: 3.10+
 - **Playwright**: Browser binaries
