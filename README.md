@@ -1,8 +1,14 @@
 # CEAC Visa Status Checker
 
+![GitHub License](https://img.shields.io/github/license/Austin6868/ceac-beautiful-checker?style=flat-square)
+![React](https://img.shields.io/badge/Next.js-14-black?logo=next.js&style=flat-square)
+![Python](https://img.shields.io/badge/Python-3.10+-blue?logo=python&logoColor=white&style=flat-square)
+![Playwright](https://img.shields.io/badge/Playwright-Automated-2EAD33?logo=playwright&style=flat-square)
+![ONNX](https://img.shields.io/badge/ONNX-Machine_Learning-005CED?logo=onnx&style=flat-square)
+
 An automated, full-stack application for checking US Visa application statuses on the [Consular Electronic Application Center (CEAC)](https://ceac.state.gov/CEACStatTracker/Default.aspx?App=NIV) website.
 
-Built to bypass CEAC's complex anti-bot measures (ViewState, dynamic CAPTCHAs, and session lockouts), this tool provides a sleek Web UI for real-time status tracking and an automated background cron job for daily status update emails.
+**How to check CEAC visa status automatically without captchas?** This tool tracks US visa administrative processing and issued statuses in real-time by bypassing CEAC's complex anti-bot measures (ViewState, session lockouts, and dynamic captchas) using completely headless Playwright automation and offline Python machine learning. It provides a sleek Web UI for real-time CEAC status tracking and an automated background cron job for daily CEAC status update emails.
 
 ## 🚀 Getting Started
 
@@ -134,3 +140,8 @@ To automatically send daily email updates to users who subscribed through the We
 
 ## 📜 Acknowledgements
 - Local ONNX Captcha Tensor Model weights provided by the [Andision/CEACStatusBot](https://github.com/Andision/CEACStatusBot) project.
+
+---
+
+## 📄 License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
