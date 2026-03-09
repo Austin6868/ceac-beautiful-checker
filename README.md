@@ -6,36 +6,6 @@ Built to bypass CEAC's complex anti-bot measures (ViewState, dynamic CAPTCHAs, a
 
 ![Web UI Demo](frontend/public/favicon.ico) <!-- Placeholder for actual screenshots if added later -->
 
-## 🌟 Features
-
-- **Automated CEAC Form Submission**: Uses Playwright to navigate the CEAC WebForms architecture, handling JavaScript postbacks and dynamic dropdowns automatically.
-- **Dual CAPTCHA Solvers**:
-  - **Local ONNX Model (Fast & Free)**: An embedded neural network trained specifically on US State Department captchas. Evaluates image tensors in milliseconds entirely offline.
-  - **Google Gemini 2.5 Pro (Fallback)**: High-accuracy generative AI vision model for tricky or highly obscured CAPTCHAs.
-- **Real-Time Log Streaming**: The Next.js API route streams standard output directly from the Python child process to the browser via Server-Sent Events (SSE).
-- **Daily Email Subscriptions**: Users can subscribe to receive automatic daily emails if their visa status changes. Powered by a local SQLite database and an asynchronous Python cron script.
-- **Premium Glassmorphic UI**: Built with Next.js and Tailwind CSS for a modern, responsive, and beautiful user experience. 
-
----
-
-## 🏗️ Architecture
-
-The repository is split into two tightly integrated components:
-
-### 1. The Backend (`/backend`)
-A Python ecosystem responsible for browser automation and AI inference.
-- `ceac_checker.py`: The core headless Playwright script. Handles navigation, dropdowns, CAPTCHA interception, and result parsing.
-- `onnx_solver.py`: Intercepts screenshot bytes and runs mathematical tensor inferences against the included `captcha.onnx` weights file.
-- `cron.py`: An asynchronous script meant to be run daily (e.g., via crontab) that queries the local `subscriptions.db`, runs the checker in parallel for all subscribers via `asyncio.subprocess`, and dispatches SMTP emails on status changes.
-
-### 2. The Frontend (`/frontend`)
-A modern React application built on the Next.js App Router.
-- `src/app/page.tsx`: The main landing page. Handles user inputs, solver selection, SSE log parsing, and the subscription modal.
-- `src/app/api/check/route.ts`: Starts the Python script using Node's `child_process.spawn()` and streams the stdout back to the client.
-- `src/app/api/subscribe/route.ts`: Manages the local SQLite database (`subscriptions.db`) using `better-sqlite3`.
-
----
-
 ## 🚀 Getting Started
 
 ### Prerequisites
@@ -44,15 +14,12 @@ A modern React application built on the Next.js App Router.
 - **Playwright**: Browser binaries
 
 ### Backend Setup
-1. Navigate to the root directory and install Python dependencies:
+1. Navigate to the backend directory and install Python dependencies via the provided npm script:
    ```bash
-   pip install playwright python-dotenv google-generativeai onnxruntime numpy pillow
+   cd backend
+   npm run install-deps
    ```
-2. Install the Playwright chromium browser:
-   ```bash
-   playwright install chromium
-   ```
-3. Create a `.env` file in the root directory. You can configure your Gemini API key (optional, if you plan to use the fallback solver) and your SMTP credentials for the daily email cron job:
+2. Create a `.env` file in the root directory. You can configure your Gemini API key (optional, if you plan to use the fallback solver) and your SMTP credentials for the daily email cron job:
    ```env
    # Captcha Fallback API
    GEMINI_API_KEY=your_google_ai_studio_key
@@ -79,6 +46,37 @@ A modern React application built on the Next.js App Router.
    npm run dev
    ```
 4. Open your browser and navigate to `http://localhost:3000`.
+
+---
+
+## 🌟 Features
+
+- **Automated CEAC Form Submission**: Uses Playwright to navigate the CEAC WebForms architecture, handling JavaScript postbacks and dynamic dropdowns automatically.
+- **Dual CAPTCHA Solvers**:
+  - **Local ONNX Model (Fast & Free)**: An embedded neural network trained specifically on US State Department captchas. Evaluates image tensors in milliseconds entirely offline.
+  - **Google Gemini 2.5 Pro (Fallback)**: High-accuracy generative AI vision model for tricky or highly obscured CAPTCHAs.
+- **Real-Time Log Streaming**: The Next.js API route streams standard output directly from the Python child process to the browser via Server-Sent Events (SSE).
+- **Daily Email Subscriptions**: Users can subscribe to receive automatic daily emails if their visa status changes. Powered by a local SQLite database and an asynchronous Python cron script.
+- **Premium Glassmorphic UI**: Built with Next.js and Tailwind CSS for a modern, responsive, and beautiful user experience. 
+
+---
+
+## 🏗️ Architecture
+
+The repository is split into two tightly integrated components:
+
+### 1. The Backend (`/backend`)
+A Python ecosystem responsible for browser automation and AI inference.
+- `ceac_checker.py`: The core headless Playwright script. Handles navigation, dropdowns, CAPTCHA interception, and result parsing.
+- `onnx_solver.py`: Intercepts screenshot bytes and runs mathematical tensor inferences against the included `captcha.onnx` weights file.
+- `cron.py`: An asynchronous script meant to be run daily (e.g., via crontab) that queries the local `subscriptions.db`, runs the checker in parallel for all subscribers via `asyncio.subprocess`, and dispatches SMTP emails on status changes.
+- `package.json`: Contains the `npm run install-deps` script to easily bootstrap the Python Pip environment and Chromium headless browsers.
+
+### 2. The Frontend (`/frontend`)
+A modern React application built on the Next.js App Router.
+- `src/app/page.tsx`: The main landing page. Handles user inputs, solver selection, SSE log parsing, and the subscription modal.
+- `src/app/api/check/route.ts`: Starts the Python script using Node's `child_process.spawn()` and streams the stdout back to the client.
+- `src/app/api/subscribe/route.ts`: Manages the local SQLite database (`subscriptions.db`) using `better-sqlite3`.
 
 ---
 

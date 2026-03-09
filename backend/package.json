@@ -1,0 +1,17 @@
+{
+  "name": "ceac-llm-checker-backend",
+  "version": "1.0.0",
+  "description": "Python backend for the CEAC Visa Status Checker",
+  "scripts": {
+    "install-deps": "pip3 install playwright python-dotenv google-generativeai onnxruntime numpy pillow && playwright install chromium",
+    "start": "python3 ceac_checker.py"
+  },
+  "dependencies": {
+    "playwright": "*",
+    "python-dotenv": "*",
+    "google-generativeai": "*",
+    "onnxruntime": "*",
+    "numpy": "*",
+    "pillow": "*"
+  }
+}
