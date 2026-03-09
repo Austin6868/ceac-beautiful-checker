@@ -10,14 +10,16 @@ import sys
 import argparse
 from dotenv import load_dotenv
 
+import onnx_solver
+
 load_dotenv()
 
 API_KEY = os.environ.get("GEMINI_API_KEY")
-if not API_KEY:
-    print("Error: GEMINI_API_KEY environment variable not set.")
-    sys.exit(1)
 
-async def solve_captcha(img_bytes):
+async def solve_captcha_gemini(img_bytes):
+    if not API_KEY:
+        print("Error: GEMINI_API_KEY environment variable not set. Falling back to ONNX...")
+        return onnx_solver.solve_captcha(img_bytes)
     print("Sending captcha to Google Gemini API...")
     try:
         client = genai.Client(api_key=API_KEY)
@@ -44,15 +46,17 @@ async def main():
     parser.add_argument("--passport", required=True, help="Passport Number")
     parser.add_argument("--surname", required=True, help="First 5 letters of Surname")
     parser.add_argument("--location", required=True, help="Location Code (e.g., BEJ for Beijing, GUZ for Guangzhou)")
+    parser.add_argument("--solver", choices=["onnx", "gemini"], default="onnx", help="Backend CAPTCHA solver to use")
     args = parser.parse_args()
 
-    print("CEAC Visa Status Checker using Playwright and Google Gemini API")
+    print(f"CEAC Visa Status Checker using Playwright and {args.solver.upper()} solver")
     print("-" * 40)
     
     case_number = args.case
     passport = args.passport
     surname = args.surname
     location = args.location
+    solver_choice = args.solver
     
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
@@ -109,9 +113,14 @@ async def main():
             print(f"Error loading page or dropdowns: {e}")
             return
             
-        print("Sending final captcha to Google Gemini API...")
-        captcha_text = await solve_captcha(img_bytes)
+        print(f"Sending final captcha to {solver_choice.upper()} solver...")
+        if solver_choice == "gemini":
+            captcha_text = await solve_captcha_gemini(img_bytes)
+        else:
+            captcha_text = onnx_solver.solve_captcha(img_bytes)
+            
         if not captcha_text:
+            print("Failed to solve captcha.")
             return
             
         print(f"Captcha solved: {captcha_text}")

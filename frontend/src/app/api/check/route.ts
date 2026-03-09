@@ -1,14 +1,11 @@
 import { NextResponse } from "next/server";
-import { exec } from "child_process";
+import { spawn } from "child_process";
 import path from "path";
-import util from "util";
-
-const execAsync = util.promisify(exec);
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { case_number, passport, surname, location } = body;
+    const { case_number, passport, surname, location, solver } = body;
 
     // Validate inputs
     if (!case_number || !passport || !surname || !location) {
@@ -18,64 +15,105 @@ export async function POST(req: Request) {
       );
     }
 
-    // Resolve paths
     const backendDir = path.resolve(process.cwd(), "../backend");
     const scriptPath = path.join(backendDir, "ceac_checker.py");
     
-    // Command
-    const command = `python3 ${scriptPath} --case "${case_number}" --passport "${passport}" --surname "${surname}" --location "${location}"`;
+    const stream = new ReadableStream({
+      start(controller) {
+        const pyProcess = spawn("python3", [
+          scriptPath,
+          "--case", case_number,
+          "--passport", passport,
+          "--surname", surname,
+          "--location", location,
+          "--solver", solver || "onnx"
+        ], {
+          cwd: backendDir,
+          env: { ...process.env, PYTHONUNBUFFERED: "1" }
+        });
 
-    const { stdout, stderr } = await execAsync(command, {
-      cwd: backendDir,
-      timeout: 60000 // 60 second timeout for the playwright check
+        let fullStdout = "";
+
+        const sendEvent = (type: string, payload: any) => {
+          controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ type, payload })}\n\n`));
+        };
+
+        pyProcess.stdout.on("data", (data) => {
+          const text = data.toString();
+          fullStdout += text;
+          // Send pure logs to frontend
+          const lines = text.split("\n").filter((l: string) => l.trim().length > 0);
+          for (const line of lines) {
+             sendEvent("log", line);
+          }
+        });
+
+        pyProcess.stderr.on("data", (data) => {
+          console.error(`Python stderr: ${data}`);
+        });
+
+        pyProcess.on("close", (code) => {
+          // Process finished, parse the fullStdout for the final result
+          if (fullStdout.includes("--- ERROR ---")) {
+             const errorMatch = fullStdout.match(/--- ERROR ---\n(.*?)\n-------------/s);
+             if (errorMatch) {
+               sendEvent("error", { error: errorMatch[1].trim() });
+             } else {
+               sendEvent("error", { error: "Unknown CEAC Form Error" });
+             }
+             controller.close();
+             return;
+          }
+
+          const result = {
+            rawOutput: fullStdout,
+            status: "Unknown",
+            caseCreated: "",
+            caseUpdated: "",
+            description: ""
+          };
+
+          const statusMatch = fullStdout.match(/Status:\s*(.+)/);
+          if (statusMatch) result.status = statusMatch[1].trim();
+
+          const createdMatch = fullStdout.match(/Case Created:\s*(.+)/);
+          if (createdMatch) result.caseCreated = createdMatch[1].trim();
+
+          const updatedMatch = fullStdout.match(/Case Last Updated:\s*(.+)/);
+          if (updatedMatch) result.caseUpdated = updatedMatch[1].trim();
+
+          const descMatch = fullStdout.match(/Description:\s*(.+)\n---/s) || fullStdout.match(/Description:\s*(.+)/);
+          if (descMatch) result.description = descMatch[1].trim();
+
+          // if we missing status, it might be an unhandled error
+          if (result.status === "Unknown" && !fullStdout.includes("--- STATUS RESULT ---")) {
+              sendEvent("error", { error: "Failed to parse CEAC status from page." });
+          } else {
+              sendEvent("result", result);
+          }
+          
+          controller.close();
+        });
+
+        // Kill process if client disconnects
+        req.signal.addEventListener("abort", () => {
+           pyProcess.kill();
+        });
+      }
     });
 
-    if (stderr && stderr.toLowerCase().includes("error")) {
-      console.error("stderr:", stderr);
-    }
+    return new Response(stream, {
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive"
+      }
+    });
 
-    // Attempt to parse the stdout using simple regex/string matching
-    // since the Python script prints formatted strings.
-    const result = {
-      rawOutput: stdout,
-      status: "Unknown",
-      caseCreated: "",
-      caseUpdated: "",
-      description: ""
-    };
-
-    const statusMatch = stdout.match(/Status:\s*(.+)/);
-    if (statusMatch) result.status = statusMatch[1].trim();
-
-    const createdMatch = stdout.match(/Case Created:\s*(.+)/);
-    if (createdMatch) result.caseCreated = createdMatch[1].trim();
-
-    const updatedMatch = stdout.match(/Case Last Updated:\s*(.+)/);
-    if (updatedMatch) result.caseUpdated = updatedMatch[1].trim();
-
-    const descMatch = stdout.match(/Description:\s*(.+)\n---/s) || stdout.match(/Description:\s*(.+)/);
-    if (descMatch) result.description = descMatch[1].trim();
-    
-    // Parse any functional errors from CEAC output (e.g. timeout or bad captcha)
-    if (stdout.includes("--- ERROR ---")) {
-       const errorMatch = stdout.match(/--- ERROR ---\n(.*?)\n-------------/s);
-       if (errorMatch) {
-         return NextResponse.json(
-           { error: errorMatch[1].trim(), rawOutput: stdout },
-           { status: 422 }
-         );
-       }
-       return NextResponse.json(
-           { error: "Unknown CEAC Form Error", rawOutput: stdout },
-           { status: 422 }
-       );
-    }
-
-    return NextResponse.json(result);
   } catch (error: any) {
-    console.error("Error executing Python script:", error);
+    console.error("Error setting up python script:", error);
     return NextResponse.json(
-      { error: "Failed to fetch visa status. Background process error." },
+      { error: "Failed to initialize visa check." },
       { status: 500 }
     );
   }
