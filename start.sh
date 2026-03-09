@@ -43,4 +43,5 @@ fi
 
 echo -e "\n🌐 Starting Next.js Development Server..."
 cd frontend
+rm -f .next/dev/lock
 npm run dev
