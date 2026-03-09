@@ -29,8 +29,10 @@ class OnnxSolver:
         return s
 
     def solve(self, image_bytes: bytes) -> str:
-        # Load the image in grayscale/RGB format logic specific to the model 
-        img = np.asarray(Image.open(BytesIO(image_bytes)), dtype=np.float32) / 255.0
+        # Load the image and force it to be 200x50 which is the expected tensor size
+        image = Image.open(BytesIO(image_bytes)).convert('RGB')
+        image = image.resize((200, 50))
+        img = np.asarray(image, dtype=np.float32) / 255.0
         img = np.expand_dims(np.transpose(img, (2, 0, 1)), axis=0)
         
         # Run inference
