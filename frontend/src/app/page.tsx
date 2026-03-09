@@ -156,7 +156,7 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-neutral-950 flex flex-col items-center justify-center p-6 sm:p-12 relative overflow-hidden font-sans text-neutral-100">
+    <main className="min-h-screen bg-neutral-950 flex flex-col items-center py-12 md:py-24 px-6 sm:px-12 relative overflow-x-hidden font-sans text-neutral-100">
       
       {/* Dynamic Background Gradients */}
       <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/20 rounded-full blur-[120px] mix-blend-screen pointer-events-none" />
