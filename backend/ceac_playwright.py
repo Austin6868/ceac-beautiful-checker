@@ -40,7 +40,7 @@ async def handle_dialog(dialog):
 
 async def main():
     parser = argparse.ArgumentParser(description="CEAC Visa Status Checker")
-    parser.add_argument("--case", required=True, help="Application ID or Case Number (e.g., AA00F7XQGR)")
+    parser.add_argument("--case", required=True, help="Application ID or Case Number (e.g., AA00000000)")
     parser.add_argument("--passport", required=True, help="Passport Number")
     parser.add_argument("--surname", required=True, help="First 5 letters of Surname")
     parser.add_argument("--location", required=True, help="Location Code (e.g., BEJ for Beijing, GUZ for Guangzhou)")
