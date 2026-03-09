@@ -4,8 +4,6 @@ An automated, full-stack application for checking US Visa application statuses o
 
 Built to bypass CEAC's complex anti-bot measures (ViewState, dynamic CAPTCHAs, and session lockouts), this tool provides a sleek Web UI for real-time status tracking and an automated background cron job for daily status update emails.
 
-![Web UI Demo](frontend/public/favicon.ico) <!-- Placeholder for actual screenshots if added later -->
-
 ## 🚀 Getting Started
 
 ### Prerequisites
