@@ -1,5 +1,5 @@
 {
-  "name": "ceac-llm-checker-backend",
+  "name": "ceac-beautiful-checker-backend",
   "version": "1.0.0",
   "description": "Python backend for the CEAC Visa Status Checker",
   "scripts": {

@@ -11,16 +11,16 @@ You can set up and run the entire application with a single command. This will b
 
 **Mac / Linux:**
 ```bash
-git clone https://github.com/Austin6868/ceac-llm-checker.git
-cd ceac-llm-checker
+git clone https://github.com/Austin6868/ceac-beautiful-checker.git
+cd ceac-beautiful-checker
 chmod +x start.sh
 ./start.sh
 ```
 
 **Windows (CMD/PowerShell):**
 ```cmd
-git clone https://github.com/Austin6868/ceac-llm-checker.git
-cd ceac-llm-checker
+git clone https://github.com/Austin6868/ceac-beautiful-checker.git
+cd ceac-beautiful-checker
 start.bat
 ```
 
@@ -127,7 +127,7 @@ To automatically send daily email updates to users who subscribed through the We
    ```
 2. Add the following line to run the script every day at 8:00 AM:
    ```bash
-   0 8 * * * cd /path/to/ceac-llm-checker/backend && python3 cron.py >> /var/log/ceac_cron.log 2>&1
+   0 8 * * * cd /path/to/ceac-beautiful-checker/backend && python3 cron.py >> /var/log/ceac_cron.log 2>&1
    ```
 
 ---
